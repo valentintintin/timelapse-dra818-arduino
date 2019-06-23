@@ -5,19 +5,15 @@
 
 Sleep *Sleep::instance;
 
-Sleep::Sleep() = default;
-
 Sleep *Sleep::getInstance() {
     if (Sleep::instance == nullptr) Sleep::instance = new Sleep;
     return Sleep::instance;
 }
 
-void Sleep::init(byte wakeUpButtonPin, byte wakeUpRtcPin, RtcDS3231<TwoWire> *rtc, bool canUseForEver) {
-    this->wakeUpButtonPin = wakeUpButtonPin;
-    this->wakeUpRtcPin = wakeUpRtcPin;
-    this->canUseForever = canUseForEver;
-    this->rtc = rtc;
+Sleep::Sleep() : rtc(new RtcDS3231<TwoWire>(Wire)) {
+}
 
+void Sleep::begin() {
     pinMode(wakeUpButtonPin, INPUT_PULLUP);
     pinMode(wakeUpRtcPin, INPUT_PULLUP);
 
@@ -101,4 +97,17 @@ void Sleep::sleepForTime(uint8_t seconds) {
     }
 
     blink(2);
+}
+
+void Sleep::setWakeupMinute(byte minute) {
+    wakeUpMinute = minute;
+}
+
+void Sleep::setWakeupHour(byte hour) {
+    wakeUpHour = hour - 1;
+}
+
+void Sleep::setPins(byte wakeUpButtonPin, byte wakeUpRtcPin) {
+    this->wakeUpButtonPin = wakeUpButtonPin;
+    this->wakeUpRtcPin = wakeUpRtcPin;
 }

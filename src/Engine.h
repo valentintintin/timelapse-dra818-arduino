@@ -31,18 +31,17 @@ public:
         PI_STOPPED, PI_STOPPING, PI_RUNNING
     };
 
-    Engine(byte raspberryPin, float freqAprs, float freqSstv, DRA *dra);
+    Engine(byte raspberryPin, float freqAprs, float freqSstv,
+           byte rxDra, byte txDra, byte pttPin, byte activePin,
+           int i2cAddress, byte wakeUpButtonPin, byte wakeUpRtcPin
+    );
 
-    void init(int slaveAddress, byte wakeUpButtonPin, byte wakeUpRtcPin, RtcDS3231<TwoWire> *rtc,
-              bool canUseForEver = false);
-
+    void begin();
     void loop();
-
     void computeCommand();
 
 private:
     void startPi();
-
     void stopPi();
 
     byte raspberryPin;

@@ -8,31 +8,31 @@
 class Sleep {
 
 public:
-    void init(byte wakeUpButtonPin, byte wakeUpRtcPin, RtcDS3231<TwoWire> *rtc, bool canUseForEver = false);
+    static Sleep *getInstance();
+
+    void setPins(byte wakeUpButtonPin, byte wakeUpRtcPin);
+
+    void begin();
     void sleepForever();
     void sleepForTime(uint8_t second);
 
-    void setWakeupMinute(byte minute) { wakeUpMinute = minute; }
+    void setWakeupMinute(byte minute);
 
-    void setWakeupHour(byte hour) { wakeUpHour = hour - 1; }
+    void setWakeupHour(byte hour);
 
-    static Sleep *getInstance();
-
-    byte wakeUpButtonPin;
+    byte wakeUpButtonPin{};
     RtcDS3231<TwoWire> *rtc;
 
 private:
-    Sleep();
-
     static void wakeUpRtc();
-
     static void wakeUpButton();
 
     static Sleep *instance = nullptr;
 
+    Sleep();
+
     byte wakeUpHour;
     byte wakeUpMinute;
-    bool canUseForever;
     byte wakeUpRtcPin;
 };
 

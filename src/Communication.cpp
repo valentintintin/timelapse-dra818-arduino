@@ -4,10 +4,11 @@
 
 Communication *Communication::instance;
 
-void Communication::init(int addr) {
+void Communication::begin() {
     DPRINT(F("I2C addr 0x"));
-    DPRINTLN(addr, HEX);
-    Wire.begin(addr);
+    DPRINTLN(i2cAddress, HEX);
+
+    Wire.begin(i2cAddress);
 
     Wire.onReceive(Communication::receiveData);
     Wire.onRequest(Communication::sendData);
@@ -37,3 +38,27 @@ Communication *Communication::getInstance() {
 }
 
 Communication::Communication() = default;
+
+COMMAND Communication::getCommand() {
+    return command;
+}
+
+uint16_t Communication::getData() {
+    return data;
+}
+
+void Communication::setResponse(COMMAND commandTarget, uint16_t value) {
+    response[commandTarget] = value;
+}
+
+void Communication::resetCommand() {
+    command = NOTHING;
+}
+
+bool Communication::hasCommand() {
+    return command != NOTHING;
+}
+
+void Communication::seti2cAddress(uint8_t addr) {
+    i2cAddress = addr;
+}

@@ -26,9 +26,10 @@
 
 #define SLAVE_ADDRESS 0x11
 
-DRA dra(RX_DRA, TX_DRA, DRA_PTT, DRA_ACTIVE);
-RtcDS3231<TwoWire> rtc(Wire);
-Engine engine(RASPBERRY_PI_PIN, FREQ_APRS, FREQ_SSTV, &dra);
+Engine engine(RASPBERRY_PI_PIN, FREQ_APRS, FREQ_SSTV,
+              RX_DRA, TX_DRA, DRA_PTT, DRA_ACTIVE,
+              SLAVE_ADDRESS, WAKEUP_BUTTON_PIN, WAKEUP_RTC_PIN
+);
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
@@ -38,7 +39,7 @@ void setup() {
 #endif
     DPRINTLN(F("Starting ..."));
 
-    engine.init(SLAVE_ADDRESS, WAKEUP_BUTTON_PIN, WAKEUP_RTC_PIN, &rtc, false);
+    engine.begin();
 
     DPRINTLN(F("Started !"));
 }

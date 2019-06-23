@@ -15,14 +15,14 @@ DRA::~DRA() {
     delete dra;
 }
 
-bool DRA::init(float freq, bool deactiveAfter, char loop) {
+bool DRA::begin(float freq, bool deactiveAfter, char loop) {
     digitalWrite(pttPin, HIGH);
     active();
 
     char i = loop;
     do {
         i--;
-        DPRINTLN(F("DRA Init ..."));
+        DPRINTLN(F("DRA begin ..."));
         if (!(dra = DRA818::configure(serial, DRA818_VHF, freq, freq, 0, 0, 0, 0, DRA818_12K5, false, false, false,
                                       &Serial))) {
             DPRINTLN(F("DRA failed"));

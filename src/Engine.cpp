@@ -1,30 +1,20 @@
 #include "Engine.h"
 #include "Utils.h"
 
-Engine::Engine(byte raspberryPin, float freqAprs, float freqSstv, DRA *dra) :
-        raspberryPin(raspberryPin), freqAprs(freqAprs), freqSstv(freqSstv), dra(dra) {
+Engine::Engine(byte raspberryPin, float freqAprs, float freqSstv,
+               byte rxDra, byte txDra, byte pttPin, byte activePin,
+               int i2cAddress, byte wakeUpButtonPin, byte wakeUpRtcPin) :
+        raspberryPin(raspberryPin), freqAprs(freqAprs), freqSstv(freqSstv),
+        dra(new DRA(rxDra, txDra, pttPin, activePin)) {
     pinMode(raspberryPin, OUTPUT);
+    Sleep::getInstance()->setPins(wakeUpButtonPin, wakeUpRtcPin);
+    Communication::getInstance()->seti2cAddress(i2cAddress);
 }
 
-void
-Engine::init(int slaveAddress, byte wakeUpButtonPin, byte wakeUpRtcPin, RtcDS3231<TwoWire> *rtc, bool canUseForEver) {
-    Communication::getInstance()->init(slaveAddress);
-    Sleep::getInstance()->init(wakeUpButtonPin, wakeUpRtcPin, rtc, canUseForEver);
-    dra->init();
-
-    dra->stopTx(false);
-
-    dra->setFreq(freqAprs);
-    dra->tx();
-    delay(1500);
-    dra->stopTx(false);
-
-    delay(1500);
-
-    dra->setFreq(freqSstv);
-    dra->tx();
-    delay(1500);
-    dra->stopTx();
+void Engine::begin() {
+    Communication::getInstance()->begin();
+    Sleep::getInstance()->begin();
+    dra->begin();
 }
 
 void Engine::startPi() {
