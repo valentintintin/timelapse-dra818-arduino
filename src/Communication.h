@@ -7,7 +7,17 @@
 class Communication {
 
 public:
-    void init(int addr, Engine *engine);
+    void init(int addr);
+
+    COMMAND getCommand() { return command; };
+
+    uint16_t getData() { return data; };
+
+    void setResponse(COMMAND commandTarget, uint16_t value) { response[commandTarget] = value; }
+
+    void resetCommand() { command = NOTHING; }
+
+    bool hasCommand() { return command != NOTHING; }
 
     static Communication *getInstance();
 
@@ -20,9 +30,9 @@ private:
 
     static Communication *instance = nullptr;
 
-    Engine *engine;
     COMMAND command;
-    int data;
+    uint16_t data;
+    uint16_t response[16];
 };
 
 #endif //SSTV_TIMELAPSE_COMMUNICATION_H

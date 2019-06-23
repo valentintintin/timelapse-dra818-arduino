@@ -6,6 +6,7 @@
 class Engine;
 
 enum COMMAND {
+    NOTHING,
     GET_VOLTAGE,
     GET_TEMPERATURE,
     GET_DRA,
@@ -37,7 +38,7 @@ public:
 
     void loop();
 
-    int computeCommand(COMMAND command, int data);
+    void computeCommand();
 
 private:
     void startPi();

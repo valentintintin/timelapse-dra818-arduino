@@ -18,11 +18,11 @@
 #define RASPBERRY_PI_PIN 8
 
 #ifdef TEST
-#define FREQ_APRS 144.800
-#else
 #define FREQ_APRS 144.600
+#else
+#define FREQ_APRS 144.800
 #endif
-#define FREQ_SSTV 144.600
+#define FREQ_SSTV 144.300
 
 #define SLAVE_ADDRESS 0x11
 
@@ -38,7 +38,7 @@ void setup() {
 #endif
     DPRINTLN(F("Starting ..."));
 
-    engine.init(SLAVE_ADDRESS, WAKEUP_BUTTON_PIN, WAKEUP_RTC_PIN, &rtc, true);
+    engine.init(SLAVE_ADDRESS, WAKEUP_BUTTON_PIN, WAKEUP_RTC_PIN, &rtc, false);
 
     DPRINTLN(F("Started !"));
 }

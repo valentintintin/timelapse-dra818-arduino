@@ -9,21 +9,15 @@ class Sleep {
 
 public:
     void init(byte wakeUpButtonPin, byte wakeUpRtcPin, RtcDS3231<TwoWire> *rtc, bool canUseForEver = false);
-
     void sleepForever();
-
-    void sleepForeverOrAlarmRtc();
-
     void sleepForTime(uint8_t second);
 
-    void sleepForAlarmRtc();
+    void setWakeupMinute(byte minute) { wakeUpMinute = minute; }
 
-    void setAlarmRtc();
+    void setWakeupHour(byte hour) { wakeUpHour = hour - 1; }
 
     static Sleep *getInstance();
 
-    byte wakeUpHour;
-    byte wakeUpMinute;
     byte wakeUpButtonPin;
     RtcDS3231<TwoWire> *rtc;
 
@@ -36,6 +30,8 @@ private:
 
     static Sleep *instance = nullptr;
 
+    byte wakeUpHour;
+    byte wakeUpMinute;
     bool canUseForever;
     byte wakeUpRtcPin;
 };
