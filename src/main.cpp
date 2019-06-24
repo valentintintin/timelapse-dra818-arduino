@@ -15,7 +15,7 @@
 
 #define WAKEUP_BUTTON_PIN 2
 #define WAKEUP_RTC_PIN 3
-#define RASPBERRY_PI_PIN 8
+#define RASPBERRY_PI_PIN 9
 
 #ifdef TEST
 #define FREQ_APRS 144.600
@@ -26,26 +26,24 @@
 
 #define SLAVE_ADDRESS 0x11
 
-Engine engine(RASPBERRY_PI_PIN, FREQ_APRS, FREQ_SSTV,
-              RX_DRA, TX_DRA, DRA_PTT, DRA_ACTIVE,
-              SLAVE_ADDRESS, WAKEUP_BUTTON_PIN, WAKEUP_RTC_PIN
-);
-
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
 
 #ifdef DEBUG
     Serial.begin(9600);
 #endif
-    DPRINTLN(F("Starting ..."));
+    DPRINTLN("Starting ...");
 
-    engine.begin();
+    Engine::begin(RASPBERRY_PI_PIN, FREQ_APRS, FREQ_SSTV,
+                  RX_DRA, TX_DRA, DRA_PTT, DRA_ACTIVE,
+                  SLAVE_ADDRESS, WAKEUP_BUTTON_PIN, WAKEUP_RTC_PIN
+    );
 
-    DPRINTLN(F("Started !"));
+    DPRINTLN("Started !");
 }
 
 void loop() {
-    engine.loop();
+    Engine::loop();
 
     delay(100);
 }

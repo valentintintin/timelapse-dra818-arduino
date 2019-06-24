@@ -8,32 +8,26 @@
 class Sleep {
 
 public:
-    static Sleep *getInstance();
+    static void begin(byte wakeUpButtonPin, byte wakeUpRtcPin);
 
-    void setPins(byte wakeUpButtonPin, byte wakeUpRtcPin);
+    static void sleepForever();
 
-    void begin();
-    void sleepForever();
-    void sleepForTime(uint8_t second);
+    static void sleepForTime(uint8_t second);
 
-    void setWakeupMinute(byte minute);
+    static void setWakeupMinute(byte minute);
 
-    void setWakeupHour(byte hour);
+    static void setWakeupHour(byte hour);
 
-    byte wakeUpButtonPin{};
-    RtcDS3231<TwoWire> *rtc;
+    static byte wakeUpButtonPin;
+    static RtcDS3231<TwoWire> rtc;
 
 private:
     static void wakeUpRtc();
     static void wakeUpButton();
 
-    static Sleep *instance = nullptr;
-
-    Sleep();
-
-    byte wakeUpHour;
-    byte wakeUpMinute;
-    byte wakeUpRtcPin;
+    static byte wakeUpHour;
+    static byte wakeUpMinute;
+    static byte wakeUpRtcPin;
 };
 
 

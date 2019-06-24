@@ -10,38 +10,34 @@
 
 class DRA {
 public:
-    DRA(byte rxDra, byte txDra, byte pttPin, byte activePin);
+    static bool begin(byte rxDra, byte txDra, byte pttPin, byte activePin,
+                      float txFreq = 144.600, bool deactiveAfter = true, char loop = 1
+    );
 
-    virtual ~DRA();
+    static void tx();
 
-    bool begin(float txFreq = 144.600, bool deactiveAfter = true, char loop = 1);
+    static void stopTx(bool deactiveAfter = true);
 
-    void tx();
+    static bool isTx();
 
-    void stopTx(bool deactiveAfter = true);
+    static bool isActive();
 
-    bool isTx();
+    static bool isDraDetected();
 
-    bool isActive();
+    static void setFreq(float freq, bool deactiveAfter = false);
 
-    bool isDraDetected();
-
-    void setFreq(float freq, bool deactiveAfter = false);
-
-    DRA818 *dra;
+    static DRA818 *dra;
 
 private:
-    void active();
+    static void active();
 
-    void deactive();
+    static void deactive();
 
-    SoftwareSerial *serial;
-
-    byte pttPin;
-    byte activePin;
-
-    bool activeState = false;
-    bool txState = false;
+    static SoftwareSerial *serial;
+    static byte pttPin;
+    static byte activePin;
+    static bool activeState;
+    static bool txState;
 };
 
 

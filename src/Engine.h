@@ -31,25 +31,23 @@ public:
         PI_STOPPED, PI_STOPPING, PI_RUNNING
     };
 
-    Engine(byte raspberryPin, float freqAprs, float freqSstv,
-           byte rxDra, byte txDra, byte pttPin, byte activePin,
-           int i2cAddress, byte wakeUpButtonPin, byte wakeUpRtcPin
-    );
+    static void begin(byte raspberryPin, float freqAprs, float freqSstv,
+                      byte rxDra, byte txDra, byte pttPin, byte activePin,
+                      int i2cAddress, byte wakeUpButtonPin, byte wakeUpRtcPin);
 
-    void begin();
-    void loop();
-    void computeCommand();
+    static void loop();
+
+    static void computeCommand();
 
 private:
-    void startPi();
-    void stopPi();
+    static void startPi();
 
-    byte raspberryPin;
-    STATE state = PI_STOPPED;
-    float freqAprs;
-    float freqSstv;
+    static void stopPi();
 
-    DRA *dra;
+    static byte raspberryPin;
+    static STATE state;
+    static float freqAprs;
+    static float freqSstv;
 };
 
 

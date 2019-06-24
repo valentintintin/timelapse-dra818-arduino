@@ -1,30 +1,31 @@
 #include "Engine.h"
 #include "Utils.h"
 
-Engine::Engine(byte raspberryPin, float freqAprs, float freqSstv,
-               byte rxDra, byte txDra, byte pttPin, byte activePin,
-               int i2cAddress, byte wakeUpButtonPin, byte wakeUpRtcPin) :
-        raspberryPin(raspberryPin), freqAprs(freqAprs), freqSstv(freqSstv),
-        dra(new DRA(rxDra, txDra, pttPin, activePin)) {
-    pinMode(raspberryPin, OUTPUT);
-    Sleep::getInstance()->setPins(wakeUpButtonPin, wakeUpRtcPin);
-    Communication::getInstance()->seti2cAddress(i2cAddress);
-}
+float Engine::freqSstv;
+float Engine::freqAprs;
+Engine::STATE Engine::state = PI_STOPPED;
+byte Engine::raspberryPin;
 
-void Engine::begin() {
-    Communication::getInstance()->begin();
-    Sleep::getInstance()->begin();
-    dra->begin();
+void Engine::begin(byte raspberryPin, float freqAprs, float freqSstv,
+                   byte rxDra, byte txDra, byte pttPin, byte activePin,
+                   int i2cAddress, byte wakeUpButtonPin, byte wakeUpRtcPin) {
+    Engine::raspberryPin = raspberryPin;
+    Engine::freqAprs = freqAprs;
+    Engine::freqSstv = freqSstv;
+    pinMode(raspberryPin, OUTPUT);
+    Communication::begin(i2cAddress);
+    Sleep::begin(wakeUpButtonPin, wakeUpRtcPin);
+    DRA::begin(rxDra, txDra, pttPin, activePin);
 }
 
 void Engine::startPi() {
-    DPRINTLN(F("startPi"));
+    DPRINTLN("startPi");
     digitalWrite(raspberryPin, HIGH);
     state = PI_RUNNING;
 }
 
 void Engine::stopPi() {
-    DPRINTLN(F("stopPi"));
+    DPRINTLN("stopPi");
     digitalWrite(raspberryPin, LOW);
     state = PI_STOPPED;
 }
@@ -32,13 +33,13 @@ void Engine::stopPi() {
 void Engine::loop() {
     switch (state) {
         case PI_STOPPING:
-            DPRINTLN(F("PI_STOPPING"));
-            Sleep::getInstance()->sleepForTime(16);
+            DPRINTLN("PI_STOPPING");
+            Sleep::sleepForTime(16);
             stopPi();
-            Sleep::getInstance()->sleepForever();
+            Sleep::sleepForever();
             break;
         case PI_STOPPED:
-            DPRINTLN(F("PI_STOPPED"));
+            DPRINTLN("PI_STOPPED");
             startPi();
             break;
         case PI_RUNNING:
@@ -48,80 +49,78 @@ void Engine::loop() {
 }
 
 void Engine::computeCommand() {
-    Communication *communication = Communication::getInstance();
-
-    if (communication->hasCommand()) {
-        COMMAND command = communication->getCommand();
-        uint16_t data = communication->getData();
+    if (Communication::hasCommand()) {
+        COMMAND command = Communication::getCommand();
+        uint8_t data = Communication::getData();
         uint16_t response = 0;
 
-        DPRINT(F("I2C CMD 0x"));
-        DPRINT(communication->getCommand());
-        DPRINT(F(" "));
+        DPRINT("I2C CMD 0x");
+        DPRINT(Communication::getCommand());
+        DPRINT(" ");
 
         switch (command) {
             case GET_VOLTAGE:
-                DPRINT(F("GET_VOLTAGE "));
+                DPRINT("GET_VOLTAGE ");
                 response = readVccAtmega();
                 break;
             case GET_TEMPERATURE:
-                DPRINT(F("GET_TEMPERATURE "));
-                response = (uint16_t) (Sleep::getInstance()->rtc->GetTemperature() * 100);
+                DPRINT("GET_TEMPERATURE ");
+                response = (uint16_t) (Sleep::rtc.GetTemperature() * 100);
                 break;
             case GET_DRA:
-                DPRINT(F("GET_DRA "));
-                response = dra->isDraDetected();
+                DPRINT("GET_DRA ");
+                response = DRA::isDraDetected();
                 break;
             case GET_BUTTON:
-                DPRINT(F("GET_BUTTON "));
-                response = digitalRead(Sleep::getInstance()->wakeUpButtonPin);
+                DPRINT("GET_BUTTON ");
+                response = digitalRead(Sleep::wakeUpButtonPin);
                 break;
             case SET_WAKEUP_HOUR:
-                DPRINT(F("SET_WAKEUP_HOUR "));
+                DPRINT("SET_WAKEUP_HOUR ");
                 response = 1;
-                Sleep::getInstance()->setWakeupHour(data);
+                Sleep::setWakeupHour(data);
                 break;
             case SET_WAKEUP_MINUTE:
-                DPRINT(F("SET_WAKEUP_MINUTE "));
+                DPRINT("SET_WAKEUP_MINUTE ");
                 response = 1;
-                Sleep::getInstance()->setWakeupMinute(data);
+                Sleep::setWakeupMinute(data);
                 break;
             case SLEEP:
-                DPRINT(F("SLEEP "));
+                DPRINT("SLEEP ");
                 response = 1;
-                dra->stopTx();
+                DRA::stopTx();
                 state = PI_STOPPING;
                 break;
             case SET_PTT_OFF:
-                DPRINT(F("SET_PTT_OFF "));
+                DPRINT("SET_PTT_OFF ");
                 response = 1;
-                dra->stopTx(false);
+                DRA::stopTx(false);
                 break;
             case SET_PTT_ON:
-                DPRINT(F("SET_PTT_ON "));
+                DPRINT("SET_PTT_ON ");
                 response = 1;
-                dra->tx();
+                DRA::tx();
                 break;
             case SET_FREQ_APRS:
-                DPRINT(F("SET_FREQ_APRS "));
+                DPRINT("SET_FREQ_APRS ");
                 response = 1;
-                dra->setFreq(freqAprs);
+                DRA::setFreq(freqAprs);
                 break;
             case SET_FREQ_SSTV:
-                DPRINT(F("SET_FREQ_SSTV "));
+                DPRINT("SET_FREQ_SSTV ");
                 response = 1;
-                dra->setFreq(freqSstv);
+                DRA::setFreq(freqSstv);
                 break;
             default:
-                DPRINT(F("unknown "));
+                DPRINT("unknown ");
                 break;
         }
 
         DPRINT(data);
-        DPRINT(F(" "));
+        DPRINT(" ");
         DPRINTLN(response);
 
-        communication->setResponse(command, response);
-        communication->resetCommand();
+        Communication::setResponse(command, response);
+        Communication::resetCommand();
     }
 }

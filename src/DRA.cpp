@@ -1,31 +1,37 @@
 #include "DRA.h"
 #include "Utils.h"
 
-DRA::DRA(byte rxDra, byte txDra, byte pttPin, byte activePin) :
-        pttPin(pttPin), activePin(activePin),
-        dra(nullptr), activeState(false), txState(false) {
+DRA818 *DRA::dra;
+SoftwareSerial *DRA::serial;
+byte DRA::pttPin;
+byte DRA::activePin;
+bool DRA::activeState = false;
+bool DRA::txState = false;
+
+bool DRA::begin(byte rxDra, byte txDra, byte pttPin, byte activePin,
+                float txFreq, bool deactiveAfter, char loop) {
+    DRA::pttPin = pttPin;
+    DRA::activePin = activePin;
+    DRA::activeState = false;
+    DRA::txState = false;
+
+    delete dra;
     serial = new SoftwareSerial(rxDra, txDra);
     serial->begin(9600);
 
     pinMode(pttPin, OUTPUT);
     pinMode(activePin, OUTPUT);
-}
 
-DRA::~DRA() {
-    delete dra;
-}
-
-bool DRA::begin(float freq, bool deactiveAfter, char loop) {
     digitalWrite(pttPin, HIGH);
     active();
 
     char i = loop;
     do {
         i--;
-        DPRINTLN(F("DRA begin ..."));
-        if (!(dra = DRA818::configure(serial, DRA818_VHF, freq, freq, 0, 0, 0, 0, DRA818_12K5, false, false, false,
+        DPRINTLN("DRA begin ...");
+        if (!(dra = DRA818::configure(serial, DRA818_VHF, txFreq, txFreq, 0, 0, 0, 0, DRA818_12K5, false, false, false,
                                       &Serial))) {
-            DPRINTLN(F("DRA failed"));
+            DPRINTLN("DRA failed");
             blink(5);
         }
     } while (dra == nullptr && i > 0);
@@ -35,12 +41,12 @@ bool DRA::begin(float freq, bool deactiveAfter, char loop) {
             deactive();
         }
 
-        DPRINTLN(F("DRA OK"));
+        DPRINTLN("DRA OK");
 
         return true;
     }
 
-    DPRINTLN(F("No DRA"));
+    DPRINTLN("No DRA");
 
     return false;
 }
@@ -55,7 +61,7 @@ void DRA::tx() {
         delay(TIME_TOGGLE_PTT);
 
         txState = true;
-        DPRINTLN(F("DRA TX"));
+        DPRINTLN("DRA TX");
     }
 }
 
@@ -67,7 +73,7 @@ void DRA::stopTx(bool deactiveAfter) {
         delay(TIME_TOGGLE_PTT);
 
         txState = false;
-        DPRINTLN(F("DRA stop TX"));
+        DPRINTLN("DRA stop TX");
 
         if (deactiveAfter) {
             deactive();
@@ -88,14 +94,14 @@ void DRA::active() {
     delay(TIME_TOGGLE_ACTIVE);
 
     activeState = true;
-    DPRINTLN(F("DRA active"));
+    DPRINTLN("DRA active");
 }
 
 void DRA::deactive() {
     digitalWrite(activePin, LOW);
 
     activeState = false;
-    DPRINTLN(F("DRA inactive"));
+    DPRINTLN("DRA inactive");
 }
 
 bool DRA::isDraDetected() {
@@ -112,7 +118,7 @@ void DRA::setFreq(float freq, bool deactiveAfter) {
 
         dra->group(0, freq, freq, 0, 0, 0);
 
-        DPRINT(F("DRA freq "));
+        DPRINT("DRA freq ");
         DPRINTLN(freq);
 
         delay(100);

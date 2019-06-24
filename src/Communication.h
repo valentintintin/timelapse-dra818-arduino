@@ -7,33 +7,25 @@
 class Communication {
 
 public:
-    static Communication *getInstance();
+    static void begin(uint8_t i2cAddress);
 
-    void seti2cAddress(uint8_t addr);
+    static COMMAND getCommand();
 
-    void begin();
+    static uint8_t getData();
 
-    COMMAND getCommand();
+    static void setResponse(COMMAND commandTarget, uint16_t value);
 
-    uint16_t getData();
+    static void resetCommand();
 
-    void setResponse(COMMAND commandTarget, uint16_t value);
-
-    void resetCommand();
-
-    bool hasCommand();
+    static bool hasCommand();
 
 private:
     static void receiveData(int bytes);
     static void sendData();
-    static Communication *instance = nullptr;
 
-    Communication();
-
-    uint8_t i2cAddress;
-    COMMAND command;
-    uint16_t data;
-    uint16_t response[16];
+    static COMMAND command;
+    static uint8_t data;
+    static uint16_t response[12];
 };
 
 #endif //SSTV_TIMELAPSE_COMMUNICATION_H
