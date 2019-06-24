@@ -22,9 +22,6 @@ void Communication::receiveData(int byteCount) {
     Communication::data = 0;
     if (byteCount > 1) {
         Communication::data = Wire.read();
-        if (byteCount > 2) {
-            Communication::data += (uint8_t) Wire.read() << 8;
-        }
     }
 }
 
