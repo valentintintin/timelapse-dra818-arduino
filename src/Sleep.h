@@ -14,17 +14,13 @@ public:
 
     static void sleepForTime(uint8_t second);
 
-    static void setWakeupMinute(byte minute);
-
     static void setWakeupHour(byte hour);
+
+    static void setWakeupMinute(byte minute);
 
     static void setSecurityInterrupt(uint16_t secondsFromNow);
 
-#ifdef DEBUG
-
     static void printCurrentTime();
-
-#endif
 
     static byte wakeUpButtonPin;
     static byte wakeUpRtcPin;

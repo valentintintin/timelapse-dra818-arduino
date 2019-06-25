@@ -22,8 +22,10 @@ void Engine::startPi() {
     DPRINTLN("startPi");
     digitalWrite(raspberryPin, HIGH);
     state = PI_RUNNING;
+#ifdef USE_WAKEUP_SECURITY
     Sleep::setSecurityInterrupt(300); // 60s * 5min
     attachInterrupt(digitalPinToInterrupt(Sleep::wakeUpRtcPin), Engine::restartPi, FALLING);
+#endif
 }
 
 void Engine::restartPi() {
@@ -36,7 +38,9 @@ void Engine::stopPi() {
     DPRINTLN("stopPi");
     digitalWrite(raspberryPin, LOW);
     state = PI_STOPPED;
+#ifdef USE_WAKEUP_SECURITY
     detachInterrupt(digitalPinToInterrupt(Sleep::wakeUpRtcPin));
+#endif
 }
 
 void Engine::loop() {
@@ -85,12 +89,12 @@ void Engine::computeCommand() {
                 response = digitalRead(Sleep::wakeUpButtonPin);
                 break;
             case SET_WAKEUP_HOUR:
-                DPRINT("SET_WAKEUP_HOUR ");
+                DPRINT("SET_WAKEUP_HOUR");
                 response = 1;
                 Sleep::setWakeupHour(data);
                 break;
             case SET_WAKEUP_MINUTE:
-                DPRINT("SET_WAKEUP_MINUTE ");
+                DPRINT("SET_WAKEUP_MINUTE");
                 response = 1;
                 Sleep::setWakeupMinute(data);
                 break;

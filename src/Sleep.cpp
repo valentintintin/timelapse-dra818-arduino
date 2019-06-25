@@ -43,7 +43,9 @@ void Sleep::sleepForever() {
 
     rtc.LatchAlarmsTriggeredFlags();
 
-    DS3231AlarmOne alarm(0, wakeUpHour, wakeUpMinute, 0, DS3231AlarmOneControl_HoursMinutesSecondsMatch);
+    time_t now = rtc.GetTime();
+    DS3231AlarmOne alarm(0, wakeUpHour, wakeUpMinute, gmtime(&now)->tm_sec,
+                         DS3231AlarmOneControl_HoursMinutesSecondsMatch);
     rtc.SetAlarmOne(alarm);
 
     DPRINT("Alarm1: ");
@@ -51,8 +53,9 @@ void Sleep::sleepForever() {
     DPRINT(":");
     DPRINTLN(alarm.Minute());
 
-    // wakeup security
+#ifdef USE_WAKEUP_SECURITY
     setSecurityInterrupt(900); // 60s * 15 min
+#endif
 
     if (!digitalRead(wakeUpButtonPin)) {
 
@@ -100,7 +103,7 @@ void Sleep::setWakeupMinute(byte minute) {
 }
 
 void Sleep::setWakeupHour(byte hour) {
-    wakeUpHour = hour - 1;
+    wakeUpHour = hour;
 }
 
 void Sleep::setSecurityInterrupt(uint16_t secondsFromNow) {
@@ -118,12 +121,8 @@ void Sleep::setSecurityInterrupt(uint16_t secondsFromNow) {
     DPRINTLN(alarm2.Minute());
 }
 
-#ifdef DEBUG
-
 void Sleep::printCurrentTime() {
     time_t now = rtc.GetTime();
     DPRINT("RTC: ");
     DPRINTLN(ctime(&now));
 }
-
-#endif
