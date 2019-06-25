@@ -22,12 +22,21 @@ void Engine::startPi() {
     DPRINTLN("startPi");
     digitalWrite(raspberryPin, HIGH);
     state = PI_RUNNING;
+    Sleep::setSecurityInterrupt(300); // 60s * 5min
+    attachInterrupt(digitalPinToInterrupt(Sleep::wakeUpRtcPin), Engine::restartPi, FALLING);
+}
+
+void Engine::restartPi() {
+    stopPi();
+    delay(100);
+    startPi();
 }
 
 void Engine::stopPi() {
     DPRINTLN("stopPi");
     digitalWrite(raspberryPin, LOW);
     state = PI_STOPPED;
+    detachInterrupt(digitalPinToInterrupt(Sleep::wakeUpRtcPin));
 }
 
 void Engine::loop() {

@@ -18,7 +18,16 @@ public:
 
     static void setWakeupHour(byte hour);
 
+    static void setSecurityInterrupt(uint16_t secondsFromNow);
+
+#ifdef DEBUG
+
+    static void printCurrentTime();
+
+#endif
+
     static byte wakeUpButtonPin;
+    static byte wakeUpRtcPin;
     static RtcDS3231<TwoWire> rtc;
 
 private:
@@ -27,7 +36,6 @@ private:
 
     static byte wakeUpHour;
     static byte wakeUpMinute;
-    static byte wakeUpRtcPin;
 };
 
 

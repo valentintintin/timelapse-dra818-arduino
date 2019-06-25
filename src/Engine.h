@@ -42,6 +42,7 @@ public:
 private:
     static void startPi();
 
+    static void restartPi();
     static void stopPi();
 
     static byte raspberryPin;
