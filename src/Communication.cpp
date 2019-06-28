@@ -21,12 +21,15 @@ void Communication::receiveData(int byteCount) {
 
     data = 0;
     if (byteCount > 1) {
-        Communication::data = Wire.read();
+        data = Wire.read();
     }
 }
 
 void Communication::sendData() {
-    Wire.write((byte *) &response[command], 2);
+    byte buffer[2];
+    buffer[0] = response[command] & 0xFF;
+    buffer[1] = (response[command] & 0xFF00) >> 8;
+    Wire.write(buffer, 2);
 }
 
 COMMAND Communication::getCommand() {

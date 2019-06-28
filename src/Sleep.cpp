@@ -5,8 +5,8 @@
 
 RtcDS3231<TwoWire> Sleep::rtc(Wire);
 byte Sleep::wakeUpButtonPin;
-byte Sleep::wakeUpHour;
-byte Sleep::wakeUpMinute;
+byte Sleep::wakeUpHour = 255;
+byte Sleep::wakeUpMinute = 255;
 byte Sleep::wakeUpRtcPin;
 
 void Sleep::begin(byte wakeUpButtonPin, byte wakeUpRtcPin) {
@@ -43,18 +43,41 @@ void Sleep::sleepForever() {
 
     rtc.LatchAlarmsTriggeredFlags();
 
-    time_t now = rtc.GetTime();
-    DS3231AlarmOne alarm(0, wakeUpHour, wakeUpMinute, gmtime(&now)->tm_sec,
-                         DS3231AlarmOneControl_HoursMinutesSecondsMatch);
-    rtc.SetAlarmOne(alarm);
+    if (wakeUpHour != 255 && wakeUpMinute != 255) {
+        time_t now = rtc.GetTime();
+        DS3231AlarmOne alarm(0, wakeUpHour, wakeUpMinute, gmtime(&now)->tm_sec,
+                             DS3231AlarmOneControl_HoursMinutesSecondsMatch);
+        rtc.SetAlarmOne(alarm);
+        wakeUpHour = 255;
+        wakeUpMinute = 255;
+    }
+
+#ifdef DEBUG
+    DS3231AlarmOne alarm = rtc.GetAlarmOne();
 
     DPRINT("Alarm1: ");
     DPRINT(alarm.Hour());
     DPRINT(":");
-    DPRINTLN(alarm.Minute());
+    DPRINT(alarm.Minute());
+    DPRINT(":");
+    DPRINTLN(alarm.Second());
+#endif
 
 #ifdef USE_WAKEUP_SECURITY
     setSecurityInterrupt(900); // 60s * 15 min
+#endif
+
+#ifdef DEBUG
+    DS3231AlarmTwo alarm2 = rtc.GetAlarmTwo();
+
+    DPRINT("Alarm2: ");
+    DPRINT(alarm2.Hour());
+    DPRINT(":");
+    DPRINTLN(alarm2.Minute());
+#endif
+
+#ifdef DEBUG
+    Serial.flush();
 #endif
 
     if (!digitalRead(wakeUpButtonPin)) {
@@ -64,10 +87,10 @@ void Sleep::sleepForever() {
 
         LowPower.idle(SLEEP_FOREVER, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_OFF, SPI_OFF, USART0_OFF, TWI_OFF);
 
-        rtc.LatchAlarmsTriggeredFlags();
-
         detachInterrupt(digitalPinToInterrupt(wakeUpButtonPin));
         detachInterrupt(digitalPinToInterrupt(wakeUpRtcPin));
+
+        rtc.LatchAlarmsTriggeredFlags();
     } else {
         while (!rtc.LatchAlarmsTriggeredFlags()) {
 #ifdef DEBUG
@@ -87,9 +110,13 @@ void Sleep::sleepForTime(uint8_t seconds) {
     DPRINT("sleepForTime: ");
     DPRINTLN(seconds);
 
-    for (uint8_t i = 0; i < seconds / 8; i++) {
+#ifdef DEBUG
+    Serial.flush();
+#endif
+
+    for (uint8_t i = 0; i < seconds / 4; i++) {
         if (!digitalRead(wakeUpButtonPin)) {
-            LowPower.idle(SLEEP_8S, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_OFF, SPI_OFF, USART0_OFF, TWI_OFF);
+            LowPower.idle(SLEEP_4S, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_OFF, SPI_OFF, USART0_OFF, TWI_OFF);
         } else {
             delay(8000);
         }
@@ -103,7 +130,7 @@ void Sleep::setWakeupMinute(byte minute) {
 }
 
 void Sleep::setWakeupHour(byte hour) {
-    wakeUpHour = hour;
+    wakeUpHour = hour - 1;
 }
 
 void Sleep::setSecurityInterrupt(uint16_t secondsFromNow) {

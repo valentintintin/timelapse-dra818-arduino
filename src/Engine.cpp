@@ -15,7 +15,10 @@ void Engine::begin(byte raspberryPin, float freqAprs, float freqSstv,
     pinMode(raspberryPin, OUTPUT);
     Communication::begin(i2cAddress);
     Sleep::begin(wakeUpButtonPin, wakeUpRtcPin);
+
+#ifndef NO_RADIO
     DRA::begin(rxDra, txDra, pttPin, activePin);
+#endif
 }
 
 void Engine::startPi() {
@@ -46,14 +49,15 @@ void Engine::stopPi() {
 void Engine::loop() {
     switch (state) {
         case PI_STOPPING:
-            DPRINTLN("PI_STOPPING");
-            Sleep::sleepForTime(16);
+            DPRINTLN("State PI_STOPPING");
+            Sleep::sleepForTime(12);
             stopPi();
             Sleep::sleepForever();
             break;
         case PI_STOPPED:
-            DPRINTLN("PI_STOPPED");
+            DPRINTLN("State PI_STOPPED");
             startPi();
+            Sleep::sleepForTime(20);
             break;
         case PI_RUNNING:
             computeCommand();

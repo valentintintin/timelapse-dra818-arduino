@@ -9,12 +9,6 @@
 #define DPRINTLN(...)
 #endif
 
-#ifdef TEST
-#define IS_TEST_MODE true
-#else
-#define IS_TEST_MODE false
-#endif
-
 void blink(byte nb);
 
 long readVccAtmega();

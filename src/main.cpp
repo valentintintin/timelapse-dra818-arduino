@@ -17,12 +17,12 @@
 #define WAKEUP_RTC_PIN 3
 #define RASPBERRY_PI_PIN 9
 
-#ifdef TEST
+#ifdef DEBUG
 #define FREQ_APRS 144.600
 #else
 #define FREQ_APRS 144.800
 #endif
-#define FREQ_SSTV 144.300
+#define FREQ_SSTV 144.600
 
 #define SLAVE_ADDRESS 0x11
 
