@@ -57,7 +57,9 @@ void Engine::loop() {
         case PI_STOPPED:
             DPRINTLN("State PI_STOPPED");
             startPi();
+#ifndef DEBUG
             Sleep::sleepForTime(20);
+#endif
             break;
         case PI_RUNNING:
             computeCommand();

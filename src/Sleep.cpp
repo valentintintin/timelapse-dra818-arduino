@@ -21,13 +21,19 @@ void Sleep::begin(byte wakeUpButtonPin, byte wakeUpRtcPin) {
 
     rtc.Begin();
     set_zone(ONE_HOUR);
-    rtc.Enable32kHzPin(false);
-    rtc.SetSquareWavePin(DS3231SquareWavePin_ModeAlarmOne);
-    rtc.LatchAlarmsTriggeredFlags();
 
 #ifdef DEBUG
     printCurrentTime();
 #endif
+
+    if (!rtc.GetIsRunning() || !rtc.IsDateTimeValid()) {
+        DPRINTLN("RTC issue or time invalid !");
+        blink(10);
+    }
+
+    rtc.Enable32kHzPin(false);
+    rtc.SetSquareWavePin(DS3231SquareWavePin_ModeAlarmOne);
+    rtc.LatchAlarmsTriggeredFlags();
 }
 
 void Sleep::wakeUpRtc() {
@@ -118,10 +124,11 @@ void Sleep::sleepForTime(uint8_t seconds) {
         if (!digitalRead(wakeUpButtonPin)) {
             LowPower.idle(SLEEP_4S, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_OFF, SPI_OFF, USART0_OFF, TWI_OFF);
         } else {
-            delay(8000);
+            delay(4000);
         }
     }
 
+    DPRINTLN("Timeout");
     blink(2);
 }
 
